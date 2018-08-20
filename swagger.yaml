@@ -1,238 +1,161 @@
-swagger: '2.0'
+swagger: "2.0"
+host: "aws290-apse2-uat-elb02.aws-290.aws.melbourneit.com.au"
+basePath: /
+securityDefinitions:
+  bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: |
+      The API uses Javascript Web Tokens [(JWT)](https://jwt.io/introduction/) for authentication. A valid token must be 
+      included in the header of each request to any endpoint, with the exception of the 
+      `login` endpoint.      
+      See the `login` endpoint for details on how to obtain a valid token.
+      ### Token expiry
+      Please note that tokens expire after 24 hours and a new token will need to be retrieved.
 info:
-  description: Api Documentation
-  version: '1.0'
-  title: Api Documentation
-  termsOfService: 'urn:tos'
+  title: Safe Food App API Documentation
+  version: "1.0"
+  description: |
+    This document describes the API used for CIMS reporting for the 
+    Safe Food Production Queensland (SFPQ) iOS App.
+  x-logo:
+    {
+      url: "http://www.rockleacoldstorage.com.au/uploads/5/4/0/4/5404362/8988336.jpg",
+      backgroundColor: "#FFFFFF",
+      altText: "SFPQ logo",
+    }
+  termsOfService: "urn:tos"
   contact: {}
   license:
     name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0'
-host: 'localhost:8080'
-basePath: /
+    url: "http://www.apache.org/licenses/LICENSE-2.0"
+
 tags:
-  - name: report
-    description: Report API
+  - name: login
+    description: >
+      Get a token to authenticate your session
   - name: config
-    description: Config API
-  - name: auth
-    description: User Auth API
+    description: >
+      Get app configuration such as categories and details about the current plant.
+  - name: reports
+    description: >
+      Allows users to create and view Reports.
+      Reports are made up of multiple `measurements`.
+      Measurements are made up of `input_id`s and `value`s.
+      The `input_id` refers to an input, such as Temperature, pH level or Salmonella Detected. These inputs come from the [config](#tag/config) endpoint.
+        
+
 paths:
-  /v1/api/login:
-    post:
-      operationId: userLogin
-      tags:
-        - auth
-        - v1
-      summary: iOS app user logs inm
-      description: The Login endpoint lets user log in
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: credentials
-          description: login credentials
-          required: true
-          schema:
-            $ref: '#/definitions/UserLogin'
-      responses:
-        '200':
-          description: Login Success. Access token allotted
-          schema:
-            $ref: '#/definitions/AccessCredentials'
-          headers:
-            Authorization:
-              type: string
-  
-  /v1/api/config:
-    get:
-      tags:
-        - config
-        - v1
-      summary: getConfig
-      operationId: getConfigUsingGET
-      consumes:
-        - application/json
-      produces:
-        - '*/*'
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/ConfigurationViewModel'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-  /v1/api/reports:
-    get:
-      tags:
-        - report
-        - v1
-      summary: getReports
-      operationId: getReportsUsingGET_1
-      consumes:
-        - application/json
-      produces:
-        - '*/*'
-      parameters:
-        - name: from_date
-          in: query
-          description: from_date
-          required: false
-          type: integer
-          format: int64
-        - name: from_date_micro_data
-          in: query
-          description: from_date_micro_data
-          required: false
-          type: integer
-          format: int64
-        - name: max_reported_date
-          in: query
-          description: max_reported_date
-          required: false
-          type: integer
-          format: int64
-        - name: max_reported_date_micro
-          in: query
-          description: max_reported_date_micro
-          required: false
-          type: integer
-          format: int64
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/ReportViewModel'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-    post:
-      tags:
-        - report
-        - v1
-      summary: postReport
-      operationId: postReportUsingPOST_1
-      consumes:
-        - application/json
-      produces:
-        - '*/*'
-      parameters:
-        - in: body
-          name: reports
-          description: reports
-          required: true
-          schema:
-            $ref: '#/definitions/ReportListViewModel'
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: object
-            additionalProperties:
-              type: array
-              items:
-                $ref: '#/definitions/PostReportViewModel'
-        '201':
-          description: Created
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-  /v1/api/version:
-    get:
-      tags:
-        - version
-        - v1
-      summary: getVersion
-      operationId: getVersionUsingGET_1
-      consumes:
-        - application/json
-      produces:
-        - '*/*'
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: string
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
-  /v2/api/login:
-    post:
-      operationId: userLogin_v2
-      tags:
-        - auth
-        - v2
-      summary: iOS app user logs inm
-      description: The Login endpoint lets user log in
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: credentials
-          description: login credentials
-          required: true
-          schema:
-            $ref: '#/definitions/UserLogin'
-      responses:
-        '200':
-          description: Login Success. Access token allotted
-          schema:
-            $ref: '#/definitions/AccessCredentials'
-          headers:
-            Authorization:
-              type: string
   /v2/api/config:
     get:
       tags:
         - config
-        - v2
-      summary: getConfig
-      operationId: getConfigUsingGET_1
+      summary: Get application config
+      description: |
+        The application config contains information such as the available categories and details about the current plant, to be used throughout the application.
+        It is recommended to fetch the application config when the application starts so that all required information is available.
+      operationId: getConfigUsingGET
       consumes:
         - application/json
       produces:
-        - '*/*'
+        - "*/*"
+      parameters:
+        - name: Authorization
+          description: Your access token from the [login](#tag/login) endpoint
+          in: header
+          type: string
+          required: true
       responses:
-        '200':
+        "200":
           description: OK
           schema:
-            $ref: '#/definitions/ConfigurationViewModel'
-        '401':
+            $ref: "#/definitions/ConfigurationViewModel"
+        "401":
           description: Unauthorized
-        '403':
+          examples:
+            application/json:
+              {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token.",
+              }
+        "403":
           description: Forbidden
-        '404':
+          examples:
+            application/json:
+              {
+                "timestamp": 1534739098038,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/config",
+              }
+        "404":
           description: Not Found
+  /v2/api/login:
+    post:
+      operationId: userLogin
+      tags:
+        - login
+      summary: Log user into the system
+      description: |
+        If a valid `user_id` and `pin` is passed, a new token will be returned
+        in the response's `Authorization` header. Include this token in the `Authorization` header of 
+        all subsequent requests.
+        ### Token Expiry 
+        Please note that tokens expire after 24 hours and a new token will need to be retrieved.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: login credentials
+          required: true
+          schema:
+            $ref: "#/definitions/UserLogin"
+      responses:
+        "200":
+          description: Login Success. Access token returned in `Authorization` header of this response
+          schema:
+            $ref: "#/definitions/AccessCredentials"
+          headers:
+            Authorization:
+              type: string
+              description: This is your token. Include this in the `Authorization` header of all subsequent requests.
+        "401":
+          description: Login Failed. Incorrect credentials
+          examples:
+            application/json:
+              {
+                "timestamp": 1534737298386,
+                "status": 401,
+                "error": "Unauthorized",
+                "message": "Login failed. Retry your credentials.",
+                "path": "/v2/api/login",
+              }
   /v2/api/reports:
     get:
       tags:
-        - report
-        - v2
-      summary: getReports
+        - reports
+      summary: Get Reports
+      description: |
+        Accepts optional query parameters and returns an array of Reports.
+        Note that Date parameters are in unix format (eg 1490678903)
       operationId: getReportsUsingGET
       consumes:
         - application/json
       produces:
-        - '*/*'
+        - "*/*"
       parameters:
+        - name: Authorization
+          description: Your access token from the [login](#tag/login) endpoint
+          in: header
+          type: string
+          required: true
         - name: from_date
           in: query
-          description: from_date
+          description: Only return reports after this date
           required: false
           type: integer
           format: int64
@@ -255,230 +178,265 @@ paths:
           type: integer
           format: int64
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             type: array
             items:
-              $ref: '#/definitions/ReportViewModel'
-        '401':
+              $ref: "#/definitions/ReportViewModel"
+        "401":
           description: Unauthorized
-        '403':
+          examples:
+            application/json:
+              {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token.",
+              }
+        "403":
           description: Forbidden
-        '404':
-          description: Not Found
+          examples:
+            application/json:
+              {
+                "timestamp": 1534738195094,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/reports",
+              }
     post:
       tags:
-        - report
-        - v2
-      summary: postReport
+        - reports
+      summary: Create Reports
       operationId: postReportUsingPOST
       consumes:
         - application/json
       produces:
-        - '*/*'
+        - "*/*"
       parameters:
+        - name: Authorization
+          in: header
+          type: string
+          required: true
         - in: body
           name: reports
           description: reports
           required: true
           schema:
-            $ref: '#/definitions/ReportListViewModel'
+            $ref: "#/definitions/ReportListViewModel"
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             type: object
-            additionalProperties:
-              type: array
-              items:
-                $ref: '#/definitions/PostReportViewModel'
-        '201':
-          description: Created
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not Found
+            properties:
+              reports:
+                type: array
+                items:
+                  $ref: "#/definitions/PostReportViewModel"
+
   /v2/api/version:
     get:
       tags:
         - version
-        - v2
-      summary: getReports
-      operationId: getReportsUsingGET_v2
+      summary: Get Version
+      description: Returns the version of the API being used.
+      operationId: getVersionUsingGET_v2
       consumes:
         - application/json
       produces:
-        - '*/*'
+        - "*/*"
       parameters:
-        - name: from_date
-          in: query
-          description: from_date
-          required: false
-          type: integer
-          format: int64
-        - name: from_date_micro_data
-          in: query
-          description: from_date_micro_data
-          required: false
-          type: integer
-          format: int64
-        - name: max_reported_date
-          in: query
-          description: max_reported_date
-          required: false
-          type: integer
-          format: int64
-        - name: max_reported_date_micro
-          in: query
-          description: max_reported_date_micro
-          required: false
-          type: integer
-          format: int64
+        - name: Authorization
+          description: Your access token from the [login](#tag/login) endpoint
+          in: header
+          type: string
+          required: true
       responses:
-        '200':
+        "200":
           description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/ReportViewModel'
-        '401':
+            type: string
+            example: "2.0"
+        "401":
           description: Unauthorized
-        '403':
+          examples:
+            application/json:
+              {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token.",
+              }
+        "403":
           description: Forbidden
-        '404':
-          description: Not Found
+          examples:
+            application/json:
+              {
+                "timestamp": 1534741015436,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/version",
+              }
 definitions:
-  Error:
-    properties:
-      title:
-        type: string
-        description: Error title
-      errors:
-        type: array
-        items:
-          $ref: '#/definitions/ErrorObject'
-  ErrorObject:
-    properties:
-      code:
-        type: integer
-        format: int32
-        description: Error code
-      description:
-        type: string
-        description: Error description
   UserLogin:
+    type: object
     properties:
       user_id:
         type: string
         description: iOS app user id
+        example: "23662"
       pin:
         type: string
         description: iOS app user pin
+        example: "0133"
   AccessCredentials:
     properties:
       plant_id:
         type: integer
+        description: The plant id of the logged in user
         format: int64
+        example: 131
   CategoryViewModel:
     type: object
     properties:
       id:
         type: integer
         format: int64
+        example: 1
       name:
         type: string
+        example: "Receival"
       order:
         type: integer
         format: int32
+        example: 1
       shortName:
         type: string
+        example: ""
       subcategories:
         type: array
         items:
-          $ref: '#/definitions/SubcategoryViewModel'
+          $ref: "#/definitions/SubcategoryViewModel"
   ComponentConfigViewModel:
     type: object
     properties:
       decimalPrecision:
         type: integer
         format: int32
+        example: 0
+      maxCharactersLimit:
+        type: integer
+        format: int32
+        example: 4
       id:
         type: integer
         format: int64
       unit:
         type: string
+        example: "C"
   ConfigurationViewModel:
     type: object
     properties:
       categories:
         type: array
         items:
-          $ref: '#/definitions/CategoryViewModel'
+          $ref: "#/definitions/CategoryViewModel"
       number_of_days_micro:
         type: integer
         format: int32
+        example: 30
       number_of_days_other:
         type: integer
         format: int32
+        example: 3
       plant:
-        $ref: '#/definitions/PlantViewModel'
+        $ref: "#/definitions/PlantViewModel"
       synchronisation_interval:
         type: integer
         format: int32
+        example: 300
   InputConfigViewModel:
     type: object
     properties:
-      componentConfig:
-        $ref: '#/definitions/ComponentConfigViewModel'
       id:
         type: integer
         format: int64
+        example: 1
       inSpecRange:
-        $ref: '#/definitions/RangeViewModel'
+        $ref: "#/definitions/RangeViewModel"
       name:
         type: string
+        example: "feed_withdrawl"
       notes:
         type: string
+        example: null
+      order:
+        type: integer
+        format: int32
+        example: 10
       validRange:
-        $ref: '#/definitions/RangeViewModel'
+        $ref: "#/definitions/RangeViewModel"
       value_type:
         type: string
+        example: "Integer"
+      display_name:
+        type: string
+        example: "Feed Withdrawl"
+      componentConfig:
+        $ref: "#/definitions/ComponentConfigViewModel"
   MeasurementViewModel:
     type: object
     properties:
       input_id:
         type: integer
         format: int64
+        description: The id of the input being reported on
+        example: 2
       value:
         type: number
         format: float
+        description: The value for the input being reported on
+        example: 1.4
+    required:
+      - input_id
+      - value
   PlantViewModel:
     type: object
     properties:
       empty:
         type: boolean
+        example: false
       id:
         type: integer
         format: int64
+        example: 131
       name:
         type: string
+        example: "factory 1"
       plantAdmin:
         type: string
+        example: "test user"
       plantAdminEmail:
         type: string
+        example: "test.user@safefood.qld.gov.au"
       plantAdminId:
         type: integer
         format: int64
+        example: 400
       qcUserId:
         type: string
+        example: "23662"
+  VersionViewModel:
+    type: string
+    example: "2.0"
   PostReportViewModel:
     type: object
     properties:
       sha1:
         type: string
+        description: The sha1 of this report
+        example: c9c482f5d69551cce48d0b8f5904a92b3cd4f925
   RangeViewModel:
     type: object
     properties:
@@ -510,62 +468,95 @@ definitions:
       reports:
         type: array
         items:
-          $ref: '#/definitions/ReportViewModel'
+          $ref: "#/definitions/ReportViewModel"
   ReportViewModel:
     type: object
     properties:
       measurements:
         type: array
         items:
-          $ref: '#/definitions/MeasurementViewModel'
+          $ref: "#/definitions/MeasurementViewModel"
       notes:
         type: string
+        description: Notes about the current report
+        example: "Those are washing and chilling example measurements. (Temp/FAC/pH)"
       reported_at:
         type: integer
         format: int64
+        description: The time of reporting (in unix format)
+        example: 1490678903
       sha1:
         type: string
+        example: "c9c482f5d69551cce48d0b8f5904a92b3cd4f925"
       subcategory_id:
         type: integer
         format: int64
+        description: The id of the subcategory
+        example: 1
+    required:
+      - notes
+      - measurements
+      - reported_at
+      - sha1
+      - subcategory_id
   SubcategoryViewModel:
     type: object
     properties:
       customizableDate:
         type: boolean
+        example: false
       id:
         type: integer
         format: int64
+        example: 1
       layoutDirection:
         type: string
+        example: "vertical"
       name:
         type: string
+        example: ""
       order:
         type: integer
         format: int32
+        example: 1
       retentionDays:
         type: integer
         format: int32
+        example: 3
       shortName:
         type: string
+        example: ""
       view_config:
         type: array
         items:
-          $ref: '#/definitions/ViewConfigViewModel'
+          $ref: "#/definitions/ViewConfigViewModel"
   ViewConfigViewModel:
     type: object
     properties:
       display_name:
         type: string
+        example: "Feed Withdrawal"
       id:
         type: integer
         format: int64
+        example: 1
       inputConfigs:
         type: array
         items:
-          $ref: '#/definitions/InputConfigViewModel'
+          $ref: "#/definitions/InputConfigViewModel"
       order:
         type: integer
         format: int32
+        example: 10
       type:
         type: string
+        example: "TimeInput"
+      graphType:
+        type: string
+        example: "bar"
+      formula:
+        type: string
+        example: null
+      layoutDirection:
+        type: string
+        example: "horizontal"

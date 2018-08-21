@@ -155,14 +155,14 @@ paths:
           required: true
         - name: from_date
           in: query
-          description: Only return reports after this date
-          required: false
+          description: Only return reports after this date (default value should be calculated using the `number_of_days_other` value from [`GET /config`](#operation/getConfigUsingGET))
+          required: true
           type: integer
           format: int64
         - name: from_date_micro_data
           in: query
-          description: from_date_micro_data
-          required: false
+          description: Only return micro reports after this date (default value should be calculated using the `number_of_days_micro` value from [`GET /config`](#operation/getConfigUsingGET))
+          required: true
           type: integer
           format: int64
         - name: max_reported_date
@@ -208,6 +208,44 @@ paths:
       tags:
         - reports
       summary: Create Reports
+      description: |
+        ### Hashing and identity
+
+        To perform data validation, particularly for data transmission, a SHA1 hash must be calculated for each report. The hash is based on the content of the report, which is described below. The client must send a valid SHA1 hash with each report, which is then compared with a server-side calculated hash. If the hashes match, we can be assured the data was not altered in any way during transport. 
+        Similarly, when the client pulls new data from the server, it should validate the SHA1 values sent by the server.
+
+        #### SHA1 Calculation Algorithm
+
+        The hexadecimal string representation of the SHA1 is calculated based on the UTF8 data from the following string for a given report: 
+        `<subcategoryId>;<reportedAt>;<notes>;[<measurement0.inputId>;<measurement0.value>...]`
+
+        - `subcategoryId`: appended as an Int
+
+        - `reportedAt`: appended as an Int ; formatted as Unix time
+
+        - `notes`: include the `;` separator even if notes are empty
+
+        - `measurement`:
+
+          - measurements should be order by `inputId` in ascending order
+
+          - for each measurement attached to the report, there would be 2 values appended to the string
+
+            - `inputId`: appended as an Int
+
+            - `value`: appended as a String which represents accurately the floating point number with correct number of decimal places as defined by their ComponentConfig
+          
+        ##### Examples:
+        - For a Polutry Washing And Chilling entry with FAC = 50.3 (precision: 1), pH = 5.3 (precision: 1) and temp = -2.40 (precision: 2) and no notes, the SHA1 would be generated based on this string: `2;1496725305000;;2;50.3;3;5.3;4;-2.40` and would result in this SHA1 hash: `6c8057ec3b66898036bfa4cc9e7a01bc04ea0f9b`
+        - For a Red meat entry of Coliform(inputId: 8, precision: 2) = 555.66 and TVC(inputId: 6, precision: 3) = 99999.95 and some notes = "Something", the SHA1 would be generated based on this string: `10;1496725305000;Something;5;6;99999.950;8;555.66` and would result in this SHA1 hash: `ba2946f6c43713258519a2c0e09c62e9c154618d`
+
+        ##### Notes:
+        - Note that values in the string are separated by `;` but the string doesn't end with a `;` character
+
+        - Precision plays a key role in this SHA generation process to accurately match with backend SHA generation policy
+
+        - If the server determines that a Report's `sha1` is invalid, the report will not be saved on the server and the response will not return an entry in the `reports` array for this report.
+
       operationId: postReportUsingPOST
       consumes:
         - application/json
@@ -234,7 +272,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/PostReportViewModel"
-
   /v2/api/version:
     get:
       tags:
@@ -345,16 +382,19 @@ definitions:
       number_of_days_micro:
         type: integer
         format: int32
+        description: Number of days of micro data the client should load when viewing reports (see the `from_date_micro_data` parameter in [`GET /reports`](#operation/getReportsUsingGET))
         example: 30
       number_of_days_other:
         type: integer
         format: int32
+        description: Number of days of regular data the client should load when viewing reports (see the `from_date` parameter in [`GET /reports`](#operation/getReportsUsingGET))
         example: 3
       plant:
         $ref: "#/definitions/PlantViewModel"
       synchronisation_interval:
         type: integer
         format: int32
+        description: how often the client is configured to synchronise (in seconds)
         example: 300
   InputConfigViewModel:
     type: object
@@ -397,7 +437,7 @@ definitions:
         type: number
         format: float
         description: The value for the input being reported on
-        example: 1.4
+        example: 50.3
     required:
       - input_id
       - value
@@ -427,6 +467,7 @@ definitions:
       qcUserId:
         type: string
         example: "23662"
+        description: The plant's `user_id`
   VersionViewModel:
     type: string
     example: "2.0"
@@ -436,7 +477,7 @@ definitions:
       sha1:
         type: string
         description: The sha1 of this report
-        example: c9c482f5d69551cce48d0b8f5904a92b3cd4f925
+        example: a157044652027135875fc51c2f1aa9af4e9f99d2
   RangeViewModel:
     type: object
     properties:
@@ -478,24 +519,25 @@ definitions:
           $ref: "#/definitions/MeasurementViewModel"
       notes:
         type: string
-        description: Notes about the current report
-        example: "Those are washing and chilling example measurements. (Temp/FAC/pH)"
+        description: Notes about the current report (can be set to "" if no notes are added)
+        example: "Test note"
       reported_at:
         type: integer
         format: int64
-        description: The time of reporting (in unix format)
-        example: 1490678903
+        description: The time of reporting; formatted as Unix time
+        example: 1496725305000
       sha1:
         type: string
-        example: "c9c482f5d69551cce48d0b8f5904a92b3cd4f925"
+        example: "a157044652027135875fc51c2f1aa9af4e9f99d2"
+        description: A SHA1 hash generated from the report's data
       subcategory_id:
         type: integer
         format: int64
         description: The id of the subcategory
-        example: 1
+        example: 2
     required:
-      - notes
       - measurements
+      - notes
       - reported_at
       - sha1
       - subcategory_id

@@ -21,7 +21,7 @@ info:
     Safe Food Production Queensland (SFPQ) iOS App.
   x-logo:
     {
-      url: "http://www.rockleacoldstorage.com.au/uploads/5/4/0/4/5404362/8988336.jpg",
+      url: "https://github.com/safefoodqld/CIMSApi/blob/master/web/logo.jpg",
       backgroundColor: "#FFFFFF",
       altText: "SFPQ logo",
     }

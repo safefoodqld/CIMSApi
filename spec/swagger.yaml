@@ -310,11 +310,11 @@ definitions:
       user_id:
         type: string
         description: iOS app user id
-        example: "23662"
+        example: "#####"
       pin:
         type: string
         description: iOS app user pin
-        example: "0133"
+        example: "####"
   AccessCredentials:
     properties:
       plant_id:

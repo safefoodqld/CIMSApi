@@ -321,7 +321,7 @@ definitions:
         type: integer
         description: The plant id of the logged in user
         format: int64
-        example: 131
+        example: ###
   CategoryViewModel:
     type: object
     properties:
@@ -438,7 +438,7 @@ definitions:
       id:
         type: integer
         format: int64
-        example: 131
+        example: ###
       name:
         type: string
         example: "###"

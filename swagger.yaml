@@ -322,7 +322,7 @@ definitions:
       user_id:
         type: string
         description: iOS app user id
-        example: "23662"
+        example: "#####"
       pin:
         type: string
         description: iOS app user pin
@@ -453,20 +453,20 @@ definitions:
         example: 131
       name:
         type: string
-        example: "factory 1"
+        example: "###"
       plantAdmin:
         type: string
-        example: "test user"
+        example: "### ###"
       plantAdminEmail:
         type: string
-        example: "test.user@safefood.qld.gov.au"
+        example: "###@safefood.qld.gov.au"
       plantAdminId:
         type: integer
         format: int64
         example: 400
       qcUserId:
         type: string
-        example: "23662"
+        example: "#####"
         description: The plant's `user_id`
   VersionViewModel:
     type: string

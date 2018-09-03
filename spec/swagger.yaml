@@ -451,7 +451,7 @@ definitions:
       plantAdminId:
         type: integer
         format: int64
-        example: 400
+        example: ###
       qcUserId:
         type: string
         example: "#####"

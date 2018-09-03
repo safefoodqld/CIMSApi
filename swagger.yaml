@@ -326,14 +326,14 @@ definitions:
       pin:
         type: string
         description: iOS app user pin
-        example: "0133"
+        example: "####"
   AccessCredentials:
     properties:
       plant_id:
         type: integer
         description: The plant id of the logged in user
         format: int64
-        example: 131
+        example: ###
   CategoryViewModel:
     type: object
     properties:
@@ -463,7 +463,7 @@ definitions:
       plantAdminId:
         type: integer
         format: int64
-        example: 400
+        example: ###
       qcUserId:
         type: string
         example: "#####"

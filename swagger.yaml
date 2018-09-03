@@ -450,7 +450,7 @@ definitions:
       id:
         type: integer
         format: int64
-        example: 131
+        example: ###
       name:
         type: string
         example: "###"

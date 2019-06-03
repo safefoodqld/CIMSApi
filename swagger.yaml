@@ -237,7 +237,7 @@ paths:
           
         ##### Examples:
         - For a Polutry Washing And Chilling entry with FAC = 50.3 (precision: 1), pH = 5.3 (precision: 1) and temp = -2.40 (precision: 2) and no notes, the SHA1 would be generated based on this string: `2;1496725305000;;2;50.3;3;5.3;4;-2.40` and would result in this SHA1 hash: `6c8057ec3b66898036bfa4cc9e7a01bc04ea0f9b`
-        - For a Red meat entry of Coliform(inputId: 8, precision: 2) = 555.66 and TVC(inputId: 6, precision: 3) = 99999.95 and some notes = "Something", the SHA1 would be generated based on this string: `10;1496725305000;Something;5;6;99999.950;8;555.66` and would result in this SHA1 hash: `ba2946f6c43713258519a2c0e09c62e9c154618d`
+        - For a Red meat entry of Coliform(inputId: 8, precision: 2) = 555.66 and TVC(inputId: 6, precision: 3) = 99999.95 and some notes = "Something", the SHA1 would be generated based on this string: `10;1496725305000;Something;6;99999.950;8;555.66` and would result in this SHA1 hash: `cd2aa4fa452f4fb412e33786c717257e1b8892cc`
 
         ##### Notes:
         - Note that values in the string are separated by `;` but the string doesn't end with a `;` character

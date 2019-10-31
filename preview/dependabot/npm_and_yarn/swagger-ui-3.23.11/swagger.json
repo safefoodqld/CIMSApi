@@ -1,0 +1,737 @@
+{
+  "swagger": "2.0",
+  "host": "aws290-apse2-uat-elb02.aws-290.aws.melbourneit.com.au",
+  "basePath": "/",
+  "securityDefinitions": {
+    "bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "The API uses Javascript Web Tokens [(JWT)](https://jwt.io/introduction/) for authentication. A valid token must be \nincluded in the header of each request to any endpoint, with the exception of the \n`login` endpoint.      \nSee the `login` endpoint for details on how to obtain a valid token.\n### Token expiry\nPlease note that tokens expire after 24 hours and a new token will need to be retrieved.\n"
+    }
+  },
+  "info": {
+    "title": "Safe Food App API Documentation",
+    "version": "1.0",
+    "description": "This document describes the API used for CIMS reporting for the \nSafe Food Production Queensland (SFPQ) iOS App.\n",
+    "x-logo": {
+      "url": "http://www.rockleacoldstorage.com.au/uploads/5/4/0/4/5404362/8988336.jpg",
+      "backgroundColor": "#FFFFFF",
+      "altText": "SFPQ logo"
+    },
+    "termsOfService": "urn:tos",
+    "contact": {},
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "tags": [
+    {
+      "name": "login",
+      "description": "Get a token to authenticate your session\n"
+    },
+    {
+      "name": "config",
+      "description": "Get app configuration such as categories and details about the current plant.\n"
+    },
+    {
+      "name": "reports",
+      "description": "Allows users to create and view Reports. Reports are made up of multiple `measurements`. Measurements are made up of `input_id`s and `value`s. The `input_id` refers to an input, such as Temperature, pH level or Salmonella Detected. These inputs come from the [config](#tag/config) endpoint.\n  \n"
+    }
+  ],
+  "paths": {
+    "/v2/api/config": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Get application config",
+        "description": "The application config contains information such as the available categories and details about the current plant, to be used throughout the application.\nIt is recommended to fetch the application config when the application starts so that all required information is available.\n",
+        "operationId": "getConfigUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "description": "Your access token from the [login](#tag/login) endpoint",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ConfigurationViewModel"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "examples": {
+              "application/json": {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token."
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "examples": {
+              "application/json": {
+                "timestamp": 1534739098038,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/config"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/v2/api/login": {
+      "post": {
+        "operationId": "userLogin",
+        "tags": [
+          "login"
+        ],
+        "summary": "Log user into the system",
+        "description": "If a valid `user_id` and `pin` is passed, a new token will be returned\nin the response's `Authorization` header. Include this token in the `Authorization` header of \nall subsequent requests.\n### Token Expiry \nPlease note that tokens expire after 24 hours and a new token will need to be retrieved.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "credentials",
+            "description": "login credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserLogin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login Success. Access token returned in `Authorization` header of this response",
+            "schema": {
+              "$ref": "#/definitions/AccessCredentials"
+            },
+            "headers": {
+              "Authorization": {
+                "type": "string",
+                "description": "This is your token. Include this in the `Authorization` header of all subsequent requests."
+              }
+            }
+          },
+          "401": {
+            "description": "Login Failed. Incorrect credentials",
+            "examples": {
+              "application/json": {
+                "timestamp": 1534737298386,
+                "status": 401,
+                "error": "Unauthorized",
+                "message": "Login failed. Retry your credentials.",
+                "path": "/v2/api/login"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/api/reports": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Get Reports",
+        "description": "Accepts optional query parameters and returns an array of Reports.\nNote that Date parameters are in unix format (eg 1490678903)\n",
+        "operationId": "getReportsUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "description": "Your access token from the [login](#tag/login) endpoint",
+            "in": "header",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "description": "Only return reports after this date (default value should be calculated using the `number_of_days_other` value from [`GET /config`](#operation/getConfigUsingGET))",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "from_date_micro_data",
+            "in": "query",
+            "description": "Only return micro reports after this date (default value should be calculated using the `number_of_days_micro` value from [`GET /config`](#operation/getConfigUsingGET))",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "max_reported_date",
+            "in": "query",
+            "description": "max_reported_date",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "max_reported_date_micro",
+            "in": "query",
+            "description": "max_reported_date_micro",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ReportViewModel"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "examples": {
+              "application/json": {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token."
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "examples": {
+              "application/json": {
+                "timestamp": 1534738195094,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/reports"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Create Reports",
+        "description": "### Hashing and identity\n\nTo perform data validation, particularly for data transmission, a SHA1 hash must be calculated for each report. The hash is based on the content of the report, which is described below. The client must send a valid SHA1 hash with each report, which is then compared with a server-side calculated hash. If the hashes match, we can be assured the data was not altered in any way during transport. \nSimilarly, when the client pulls new data from the server, it should validate the SHA1 values sent by the server.\n\n#### SHA1 Calculation Algorithm\n\nThe hexadecimal string representation of the SHA1 is calculated based on the UTF8 data from the following string for a given report: \n`<subcategoryId>;<reportedAt>;<notes>;[<measurement0.inputId>;<measurement0.value>...]`\n\n- `subcategoryId`: appended as an Int\n\n- `reportedAt`: appended as an Int ; formatted as Unix time\n\n- `notes`: include the `;` separator even if notes are empty\n\n- `measurement`:\n\n  - measurements should be order by `inputId` in ascending order\n\n  - for each measurement attached to the report, there would be 2 values appended to the string\n\n    - `inputId`: appended as an Int\n\n    - `value`: appended as a String which represents accurately the floating point number with correct number of decimal places as defined by their ComponentConfig\n  \n##### Examples:\n- For a Polutry Washing And Chilling entry with FAC = 50.3 (precision: 1), pH = 5.3 (precision: 1) and temp = -2.40 (precision: 2) and no notes, the SHA1 would be generated based on this string: `2;1496725305000;;2;50.3;3;5.3;4;-2.40` and would result in this SHA1 hash: `6c8057ec3b66898036bfa4cc9e7a01bc04ea0f9b`\n- For a Red meat entry of Coliform(inputId: 8, precision: 2) = 555.66 and TVC(inputId: 6, precision: 3) = 99999.95 and some notes = \"Something\", the SHA1 would be generated based on this string: `10;1496725305000;Something;5;6;99999.950;8;555.66` and would result in this SHA1 hash: `ba2946f6c43713258519a2c0e09c62e9c154618d`\n\n##### Notes:\n- Note that values in the string are separated by `;` but the string doesn't end with a `;` character\n\n- Precision plays a key role in this SHA generation process to accurately match with backend SHA generation policy\n\n- If the server determines that a Report's `sha1` is invalid, the report will not be saved on the server and the response will not return an entry in the `reports` array for this report.\n",
+        "operationId": "postReportUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "reports",
+            "description": "reports",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ReportListViewModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reports": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/PostReportViewModel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/api/version": {
+      "get": {
+        "tags": [
+          "version"
+        ],
+        "summary": "Get Version",
+        "description": "Returns the version of the API being used.",
+        "operationId": "getVersionUsingGET_v2",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "description": "Your access token from the [login](#tag/login) endpoint",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "string",
+              "example": "2.0"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "examples": {
+              "application/json": {
+                "code": "SFD-401",
+                "title": "Unauthorized",
+                "message": "Your token has expired. Please login again to refresh your token."
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "examples": {
+              "application/json": {
+                "timestamp": 1534741015436,
+                "status": 403,
+                "error": "Forbidden",
+                "message": "Access Denied",
+                "path": "/v2/api/version"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "UserLogin": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "iOS app user id",
+          "example": "#####"
+        },
+        "pin": {
+          "type": "string",
+          "description": "iOS app user pin",
+          "example": "####"
+        }
+      }
+    },
+    "AccessCredentials": {
+      "properties": {
+        "plant_id": {
+          "type": "integer",
+          "description": "The plant id of the logged in user",
+          "format": "int64",
+          "example": null
+        }
+      }
+    },
+    "CategoryViewModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1
+        },
+        "name": {
+          "type": "string",
+          "example": "Receival"
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1
+        },
+        "shortName": {
+          "type": "string",
+          "example": ""
+        },
+        "subcategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubcategoryViewModel"
+          }
+        }
+      }
+    },
+    "ComponentConfigViewModel": {
+      "type": "object",
+      "properties": {
+        "decimalPrecision": {
+          "type": "integer",
+          "format": "int32",
+          "example": 0
+        },
+        "maxCharactersLimit": {
+          "type": "integer",
+          "format": "int32",
+          "example": 4
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "unit": {
+          "type": "string",
+          "example": "C"
+        }
+      }
+    },
+    "ConfigurationViewModel": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CategoryViewModel"
+          }
+        },
+        "number_of_days_micro": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of days of micro data the client should load when viewing reports (see the `from_date_micro_data` parameter in [`GET /reports`](#operation/getReportsUsingGET))",
+          "example": 30
+        },
+        "number_of_days_other": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of days of regular data the client should load when viewing reports (see the `from_date` parameter in [`GET /reports`](#operation/getReportsUsingGET))",
+          "example": 3
+        },
+        "plant": {
+          "$ref": "#/definitions/PlantViewModel"
+        },
+        "synchronisation_interval": {
+          "type": "integer",
+          "format": "int32",
+          "description": "how often the client is configured to synchronise (in seconds)",
+          "example": 300
+        }
+      }
+    },
+    "InputConfigViewModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1
+        },
+        "inSpecRange": {
+          "$ref": "#/definitions/RangeViewModel"
+        },
+        "name": {
+          "type": "string",
+          "example": "feed_withdrawl"
+        },
+        "notes": {
+          "type": "string",
+          "example": null
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "example": 10
+        },
+        "validRange": {
+          "$ref": "#/definitions/RangeViewModel"
+        },
+        "value_type": {
+          "type": "string",
+          "example": "Integer"
+        },
+        "display_name": {
+          "type": "string",
+          "example": "Feed Withdrawl"
+        },
+        "componentConfig": {
+          "$ref": "#/definitions/ComponentConfigViewModel"
+        }
+      }
+    },
+    "MeasurementViewModel": {
+      "type": "object",
+      "properties": {
+        "input_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The id of the input being reported on",
+          "example": 2
+        },
+        "value": {
+          "type": "number",
+          "format": "float",
+          "description": "The value for the input being reported on",
+          "example": 50.3
+        }
+      },
+      "required": [
+        "input_id",
+        "value"
+      ]
+    },
+    "PlantViewModel": {
+      "type": "object",
+      "properties": {
+        "empty": {
+          "type": "boolean",
+          "example": false
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": null
+        },
+        "name": {
+          "type": "string",
+          "example": "###"
+        },
+        "plantAdmin": {
+          "type": "string",
+          "example": "### ###"
+        },
+        "plantAdminEmail": {
+          "type": "string",
+          "example": "###@safefood.qld.gov.au"
+        },
+        "plantAdminId": {
+          "type": "integer",
+          "format": "int64",
+          "example": null
+        },
+        "qcUserId": {
+          "type": "string",
+          "example": "#####",
+          "description": "The plant's `user_id`"
+        }
+      }
+    },
+    "VersionViewModel": {
+      "type": "string",
+      "example": "2.0"
+    },
+    "PostReportViewModel": {
+      "type": "object",
+      "properties": {
+        "sha1": {
+          "type": "string",
+          "description": "The sha1 of this report",
+          "example": "a157044652027135875fc51c2f1aa9af4e9f99d2"
+        }
+      }
+    },
+    "RangeViewModel": {
+      "type": "object",
+      "properties": {
+        "maxValueBoolean": {
+          "type": "boolean"
+        },
+        "maxValueDouble": {
+          "type": "number",
+          "format": "double"
+        },
+        "maxValueFloat": {
+          "type": "number",
+          "format": "float"
+        },
+        "maxValueInteger": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minValueBoolean": {
+          "type": "boolean"
+        },
+        "minValueDouble": {
+          "type": "number",
+          "format": "double"
+        },
+        "minValueFloat": {
+          "type": "number",
+          "format": "float"
+        },
+        "minValueInteger": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "ReportListViewModel": {
+      "type": "object",
+      "properties": {
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReportViewModel"
+          }
+        }
+      }
+    },
+    "ReportViewModel": {
+      "type": "object",
+      "properties": {
+        "measurements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MeasurementViewModel"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Notes about the current report (can be set to \"\" if no notes are added)",
+          "example": "Test note"
+        },
+        "reported_at": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The time of reporting; formatted as Unix time",
+          "example": 1496725305000
+        },
+        "sha1": {
+          "type": "string",
+          "example": "a157044652027135875fc51c2f1aa9af4e9f99d2",
+          "description": "A SHA1 hash generated from the report's data"
+        },
+        "subcategory_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The id of the subcategory",
+          "example": 2
+        }
+      },
+      "required": [
+        "measurements",
+        "notes",
+        "reported_at",
+        "sha1",
+        "subcategory_id"
+      ]
+    },
+    "SubcategoryViewModel": {
+      "type": "object",
+      "properties": {
+        "customizableDate": {
+          "type": "boolean",
+          "example": false
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1
+        },
+        "layoutDirection": {
+          "type": "string",
+          "example": "vertical"
+        },
+        "name": {
+          "type": "string",
+          "example": ""
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1
+        },
+        "retentionDays": {
+          "type": "integer",
+          "format": "int32",
+          "example": 3
+        },
+        "shortName": {
+          "type": "string",
+          "example": ""
+        },
+        "view_config": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ViewConfigViewModel"
+          }
+        }
+      }
+    },
+    "ViewConfigViewModel": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "example": "Feed Withdrawal"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1
+        },
+        "inputConfigs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InputConfigViewModel"
+          }
+        },
+        "order": {
+          "type": "integer",
+          "format": "int32",
+          "example": 10
+        },
+        "type": {
+          "type": "string",
+          "example": "TimeInput"
+        },
+        "graphType": {
+          "type": "string",
+          "example": "bar"
+        },
+        "formula": {
+          "type": "string",
+          "example": null
+        },
+        "layoutDirection": {
+          "type": "string",
+          "example": "horizontal"
+        }
+      }
+    }
+  }
+}

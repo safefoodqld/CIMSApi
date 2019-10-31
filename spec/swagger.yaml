@@ -1,0 +1,571 @@
+swagger: '2.0'
+info:
+  description: Api Documentation
+  version: '1.0'
+  title: Api Documentation
+  termsOfService: 'urn:tos'
+  contact: {}
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0'
+host: 'localhost:8080'
+basePath: /
+tags:
+  - name: report
+    description: Report API
+  - name: config
+    description: Config API
+  - name: auth
+    description: User Auth API
+paths:
+  /v1/api/login:
+    post:
+      operationId: userLogin
+      tags:
+        - auth
+        - v1
+      summary: iOS app user logs inm
+      description: The Login endpoint lets user log in
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: login credentials
+          required: true
+          schema:
+            $ref: '#/definitions/UserLogin'
+      responses:
+        '200':
+          description: Login Success. Access token allotted
+          schema:
+            $ref: '#/definitions/AccessCredentials'
+          headers:
+            Authorization:
+              type: string
+  
+  /v1/api/config:
+    get:
+      tags:
+        - config
+        - v1
+      summary: getConfig
+      operationId: getConfigUsingGET
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ConfigurationViewModel'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /v1/api/reports:
+    get:
+      tags:
+        - report
+        - v1
+      summary: getReports
+      operationId: getReportsUsingGET_1
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: from_date
+          in: query
+          description: from_date
+          required: false
+          type: integer
+          format: int64
+        - name: from_date_micro_data
+          in: query
+          description: from_date_micro_data
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date
+          in: query
+          description: max_reported_date
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date_micro
+          in: query
+          description: max_reported_date_micro
+          required: false
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReportViewModel'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    post:
+      tags:
+        - report
+        - v1
+      summary: postReport
+      operationId: postReportUsingPOST_1
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: reports
+          description: reports
+          required: true
+          schema:
+            $ref: '#/definitions/ReportListViewModel'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                $ref: '#/definitions/PostReportViewModel'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /v1/api/version:
+    get:
+      tags:
+        - version
+        - v1
+      summary: getVersion
+      operationId: getVersionUsingGET_1
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /v2/api/login:
+    post:
+      operationId: userLogin_v2
+      tags:
+        - auth
+        - v2
+      summary: iOS app user logs inm
+      description: The Login endpoint lets user log in
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: login credentials
+          required: true
+          schema:
+            $ref: '#/definitions/UserLogin'
+      responses:
+        '200':
+          description: Login Success. Access token allotted
+          schema:
+            $ref: '#/definitions/AccessCredentials'
+          headers:
+            Authorization:
+              type: string
+  /v2/api/config:
+    get:
+      tags:
+        - config
+        - v2
+      summary: getConfig
+      operationId: getConfigUsingGET_1
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ConfigurationViewModel'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /v2/api/reports:
+    get:
+      tags:
+        - report
+        - v2
+      summary: getReports
+      operationId: getReportsUsingGET
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: from_date
+          in: query
+          description: from_date
+          required: false
+          type: integer
+          format: int64
+        - name: from_date_micro_data
+          in: query
+          description: from_date_micro_data
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date
+          in: query
+          description: max_reported_date
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date_micro
+          in: query
+          description: max_reported_date_micro
+          required: false
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReportViewModel'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    post:
+      tags:
+        - report
+        - v2
+      summary: postReport
+      operationId: postReportUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: reports
+          description: reports
+          required: true
+          schema:
+            $ref: '#/definitions/ReportListViewModel'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                $ref: '#/definitions/PostReportViewModel'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /v2/api/version:
+    get:
+      tags:
+        - version
+        - v2
+      summary: getReports
+      operationId: getReportsUsingGET_v2
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: from_date
+          in: query
+          description: from_date
+          required: false
+          type: integer
+          format: int64
+        - name: from_date_micro_data
+          in: query
+          description: from_date_micro_data
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date
+          in: query
+          description: max_reported_date
+          required: false
+          type: integer
+          format: int64
+        - name: max_reported_date_micro
+          in: query
+          description: max_reported_date_micro
+          required: false
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ReportViewModel'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+definitions:
+  Error:
+    properties:
+      title:
+        type: string
+        description: Error title
+      errors:
+        type: array
+        items:
+          $ref: '#/definitions/ErrorObject'
+  ErrorObject:
+    properties:
+      code:
+        type: integer
+        format: int32
+        description: Error code
+      description:
+        type: string
+        description: Error description
+  UserLogin:
+    properties:
+      user_id:
+        type: string
+        description: iOS app user id
+      pin:
+        type: string
+        description: iOS app user pin
+  AccessCredentials:
+    properties:
+      plant_id:
+        type: integer
+        format: int64
+  CategoryViewModel:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      order:
+        type: integer
+        format: int32
+      shortName:
+        type: string
+      subcategories:
+        type: array
+        items:
+          $ref: '#/definitions/SubcategoryViewModel'
+  ComponentConfigViewModel:
+    type: object
+    properties:
+      decimalPrecision:
+        type: integer
+        format: int32
+      id:
+        type: integer
+        format: int64
+      unit:
+        type: string
+  ConfigurationViewModel:
+    type: object
+    properties:
+      categories:
+        type: array
+        items:
+          $ref: '#/definitions/CategoryViewModel'
+      number_of_days_micro:
+        type: integer
+        format: int32
+      number_of_days_other:
+        type: integer
+        format: int32
+      plant:
+        $ref: '#/definitions/PlantViewModel'
+      synchronisation_interval:
+        type: integer
+        format: int32
+  InputConfigViewModel:
+    type: object
+    properties:
+      componentConfig:
+        $ref: '#/definitions/ComponentConfigViewModel'
+      id:
+        type: integer
+        format: int64
+      inSpecRange:
+        $ref: '#/definitions/RangeViewModel'
+      name:
+        type: string
+      notes:
+        type: string
+      validRange:
+        $ref: '#/definitions/RangeViewModel'
+      value_type:
+        type: string
+  MeasurementViewModel:
+    type: object
+    properties:
+      input_id:
+        type: integer
+        format: int64
+      value:
+        type: number
+        format: float
+  PlantViewModel:
+    type: object
+    properties:
+      empty:
+        type: boolean
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      plantAdmin:
+        type: string
+      plantAdminEmail:
+        type: string
+      plantAdminId:
+        type: integer
+        format: int64
+      qcUserId:
+        type: string
+  PostReportViewModel:
+    type: object
+    properties:
+      sha1:
+        type: string
+  RangeViewModel:
+    type: object
+    properties:
+      maxValueBoolean:
+        type: boolean
+      maxValueDouble:
+        type: number
+        format: double
+      maxValueFloat:
+        type: number
+        format: float
+      maxValueInteger:
+        type: integer
+        format: int32
+      minValueBoolean:
+        type: boolean
+      minValueDouble:
+        type: number
+        format: double
+      minValueFloat:
+        type: number
+        format: float
+      minValueInteger:
+        type: integer
+        format: int32
+  ReportListViewModel:
+    type: object
+    properties:
+      reports:
+        type: array
+        items:
+          $ref: '#/definitions/ReportViewModel'
+  ReportViewModel:
+    type: object
+    properties:
+      measurements:
+        type: array
+        items:
+          $ref: '#/definitions/MeasurementViewModel'
+      notes:
+        type: string
+      reported_at:
+        type: integer
+        format: int64
+      sha1:
+        type: string
+      subcategory_id:
+        type: integer
+        format: int64
+  SubcategoryViewModel:
+    type: object
+    properties:
+      customizableDate:
+        type: boolean
+      id:
+        type: integer
+        format: int64
+      layoutDirection:
+        type: string
+      name:
+        type: string
+      order:
+        type: integer
+        format: int32
+      retentionDays:
+        type: integer
+        format: int32
+      shortName:
+        type: string
+      view_config:
+        type: array
+        items:
+          $ref: '#/definitions/ViewConfigViewModel'
+  ViewConfigViewModel:
+    type: object
+    properties:
+      display_name:
+        type: string
+      id:
+        type: integer
+        format: int64
+      inputConfigs:
+        type: array
+        items:
+          $ref: '#/definitions/InputConfigViewModel'
+      order:
+        type: integer
+        format: int32
+      type:
+        type: string
